@@ -23,53 +23,53 @@ function Generate()
     //document.getElementById("password").value = "";
     var question = document.getElementById("question").value;
 
-    var answer = hex_hmac_sha1(password, question.toLowerCase().replace(/[^a-zA-Z]/g, ""));
+    var answer = hmac_sha1(password, question.toLowerCase().replace(/[^a-zA-Z]/g, ""));
 
     document.getElementById("Answer").innerHTML = answer;
     //alert("" + answer);
 }
 
 /*
- * A JavaScript implementation of the Secure Hash Algorithm, SHA-1, as defined
- * in FIPS PUB 180-1
- * Version 2.1 Copyright Paul Johnston 2000 - 2002.
- * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
- * Distributed under the BSD License
- * See http://pajhome.org.uk/crypt/md5 for details.
+ * A JavaScript implementation of the Secure Hash Algorithm, HMAC-SHA-1, as defined in FIPS PUB 180-1
+ * See http://pajhome.org.uk/crypt/md5 for source code.
  */
  
-/*
- * Configurable variables. You may need to tweak these to be compatible with
- * the server-side, but the defaults work in most cases.
- */
+/* CONSTANTS */
 var character_size = 8; /* bits per input character. 8 - ASCII; 16 - Unicode      */
- 
-function hex_hmac_sha1(key, data) { return binb2hex(core_hmac_sha1(key, data)); }
- 
-/* Calculate the SHA-1 of an array of big-endian words, and a bit length */
-function core_sha1(x, len) 
+
+function hmac_sha1(key, data)
 {
+  var bkey = str2binb(key);
+  if (bkey.length > 16) bkey = core_sha1(bkey, key.length * character_size);
+ 
+  var ipad = Array(16), opad = Array(16);
+  for (var i = 0; i < 16; i++) { ipad[i] = bkey[i] ^ 0x36363636; opad[i] = bkey[i] ^ 0x5C5C5C5C; }
+ 
+  var hash = core_sha1(ipad.concat(str2binb(data)), 512 + data.length * character_size);
+  return  binb2hex(core_sha1(opad.concat(hash), 512 + 160));
+}
+
+/* Calculate the SHA-1 of an array of big-endian words, and a bit length */
+function core_sha1(x, len)
+{
+  /* Pad the input to have 8 bits and be a multiple of 512. */
   x[len >> 5] |= 0x80 << (24 - len % 32);
   x[((len + 64 >> 9) << 4) + 15] = len;
  
   var w = Array(80);
-  var a = 1732584193;
-  var b = -271733879;
-  var c = -1732584194;
-  var d = 271733878;
-  var e = -1009589776;
- 
+  var hash = [1732584193, -271733879, -1732584194, 271733878, -1009589776]
+  var constants = [1518500249, 1859775393 , -1894007588, -899497514]
   for (var i = 0; i < x.length; i += 16) {
-    var olda = a;
-    var oldb = b;
-    var oldc = c;
-    var oldd = d;
-    var olde = e;
+    var a = hash[0];
+    var b = hash[1];
+    var c = hash[2];
+    var d = hash[3];
+    var e = hash[4];
  
-    for (var j = 0; j < 80; j++) {
-      if (j < 16) w[j] = x[i + j];
-      else w[j] = rol(w[j - 3] ^ w[j - 8] ^ w[j - 14] ^ w[j - 16], 1);
-      var t = safe_add(safe_add(rol(a, 5), sha1_ft(j, b, c, d)), safe_add(safe_add(e, w[j]), sha1_kt(j)));
+    for (var j = 0; j < 80; j++) 
+    {
+      w[j] = j < 16 ? x[i + j] : rol(w[j - 3] ^ w[j - 8] ^ w[j - 14] ^ w[j - 16], 1);
+      var t = safe_add(safe_add(rol(a, 5), sha_func(j, b, c, d)), safe_add(safe_add(e, w[j]), constants[(j/20)>>0]));
       e = d;
       d = c;
       c = rol(b, 30);
@@ -77,48 +77,26 @@ function core_sha1(x, len)
       a = t;
     }
  
-    a = safe_add(a, olda);
-    b = safe_add(b, oldb);
-    c = safe_add(c, oldc);
-    d = safe_add(d, oldd);
-    e = safe_add(e, olde);
+    hash[0] = safe_add(a, hash[0]);
+    hash[1] = safe_add(b, hash[1]);
+    hash[2] = safe_add(c, hash[2]);
+    hash[3] = safe_add(d, hash[3]);
+    hash[4] = safe_add(e, hash[4]);
   }
-  return Array(a, b, c, d, e);
- 
+  return hash;
 }
- 
-/*
- * Perform the appropriate triplet combination function for the current
- * iteration
- */
-function sha1_ft(t, b, c, d) {
-  if (t < 20) return (b & c) | ((~b) & d);
-  if (t < 40) return b ^ c ^ d;
-  if (t < 60) return (b & c) | (b & d) | (c & d);
-  return b ^ c ^ d;
-}
- 
-/* Determine the appropriate additive constant for the current iteration */
-function sha1_kt(t) { return (t < 20) ? 1518500249 : (t < 40) ? 1859775393 : (t < 60) ? -1894007588 : -899497514; }
- 
-/* Calculate the HMAC-SHA1 of a key and some data */
-function core_hmac_sha1(key, data) {
-  var bkey = str2binb(key);
-  if (bkey.length > 16) bkey = core_sha1(bkey, key.length * character_size);
- 
-  var ipad = Array(16),
-    opad = Array(16);
-  for (var i = 0; i < 16; i++) {
-    ipad[i] = bkey[i] ^ 0x36363636;
-    opad[i] = bkey[i] ^ 0x5C5C5C5C;
-  }
- 
-  var hash = core_sha1(ipad.concat(str2binb(data)), 512 + data.length * character_size);
-  return core_sha1(opad.concat(hash), 512 + 160);
+
+function sha_func(iter, x, y, z)
+{
+  if (iter < 20) return (x & y) | ((~x) & z);
+  if (iter < 40) return x ^ y ^ z;
+  if (iter < 60) return (x & y) | (x & z) | (y & z);
+  return x ^ y ^ z;
 }
  
 /* Add integers, wrapping at 2^32. This uses 16-bit operations internally to work around bugs in some JS interpreters. */
-function safe_add(x, y) {
+function safe_add(x, y)
+{
   var lsw = (x & 0xFFFF) + (y & 0xFFFF);
   var msw = (x >> 16) + (y >> 16) + (lsw >> 16);
   return (msw << 16) | (lsw & 0xFFFF);
@@ -130,7 +108,8 @@ function rol(num, cnt) { return (num << cnt) | (num >>> (32 - cnt)); }
  * Convert an 8-bit or 16-bit string to an array of big-endian words
  * In 8-bit function, characters >255 have their hi-byte silently ignored.
  */
-function str2binb(str) {
+function str2binb(str)
+{
   var bin = Array();
   var mask = (1 << character_size) - 1;
   for (var i = 0; i < str.length * character_size; i += character_size)
@@ -139,11 +118,13 @@ function str2binb(str) {
 }
  
 /* Convert an array of big-endian words to a hex string. */
-function binb2hex(binarray) {
+function binb2hex(binarray)
+{
   var hex_tab = "0123456789abcdef";
   var str = "";
-  for (var i = 0; i < binarray.length * 4; i++) {
-    str += hex_tab.charAt((binarray[i >> 2] >> ((3 - i % 4) * 8 + 4)) & 0xF) + hex_tab.charAt((binarray[i >> 2] >> ((3 - i % 4) * 8)) & 0xF);
+  for (var i = 0; i < binarray.length * 4; i++) 
+  { 
+	  str += hex_tab.charAt((binarray[i >> 2] >> ((3 - i % 4) * 8 + 4)) & 0xF) + hex_tab.charAt((binarray[i >> 2] >> ((3 - i % 4) * 8)) & 0xF);
   }
   return str;
 }
