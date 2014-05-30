@@ -23,9 +23,9 @@ function Generate()
     //document.getElementById("password").value = "";
     var question = document.getElementById("question").value;
 
-    var answer = question.toLowerCase().replace(/[^a-zA-Z]/g, "");
+    var answer = hex_hmac_sha1(password, question.toLowerCase().replace(/[^a-zA-Z]/g, ""));
 
-    document.getElementById("Answer").innerHTML = hex_hmac_sha1(password, answer);
+    document.getElementById("Answer").innerHTML = answer;
     //alert("" + answer);
 }
 
@@ -226,8 +226,6 @@ function binb2b64(binarray) {
   }
   return str;
 }
-
-
 
 </script>
 
