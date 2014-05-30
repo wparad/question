@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>Security Answer Generator</h1>
+
+<form action="">
+Question: <input type="text" id="question" value="" size="100">
+Password: <input type="password" id="password" value="" size="20">
+</form>
+
+<button onclick="Generate()">Generate</button>
+
+<br />
+<br />
+Answer:
+ <p name="Answer" id="Answer"></p>
+
+<script>
+function Generate() 
+{
+    var password = document.getElementById("password").value;
+    var question = document.getElementById("question").value;
+
+    var answer = question.toLowerCase().replace(/[^a-zA-Z]/g, "");
+
+    document.getElementById("Answer").innerHTML = answer;
+    //alert("" + answer);
+}
+</script>
+
+</body>
+</html> 
