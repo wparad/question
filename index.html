@@ -31,7 +31,8 @@ function Generate()
 
 /*
  * A JavaScript implementation of the Secure Hash Algorithm, HMAC-SHA-1, as defined in FIPS PUB 180-1
- * See http://pajhome.org.uk/crypt/md5 for source code.
+ * Author: Warren Parad
+ * Copyright 2014
  */
  
 /* CONSTANTS */
@@ -69,7 +70,7 @@ function core_sha1(x, len)
     for (var j = 0; j < 80; j++) 
     {
       w[j] = j < 16 ? x[i + j] : rol(w[j - 3] ^ w[j - 8] ^ w[j - 14] ^ w[j - 16], 1);
-      var t = safe_add(safe_add(rol(a, 5), sha_func(j, b, c, d)), safe_add(safe_add(e, w[j]), constants[(j/20)>>0]));
+      var t = add_32(add_32(rol(a, 5), sha_func(j, b, c, d)), add_32(add_32(e, w[j]), constants[(j/20)>>0]));
       e = d;
       d = c;
       c = rol(b, 30);
@@ -77,11 +78,11 @@ function core_sha1(x, len)
       a = t;
     }
  
-    hash[0] = safe_add(a, hash[0]);
-    hash[1] = safe_add(b, hash[1]);
-    hash[2] = safe_add(c, hash[2]);
-    hash[3] = safe_add(d, hash[3]);
-    hash[4] = safe_add(e, hash[4]);
+    hash[0] = add_32(a, hash[0]);
+    hash[1] = add_32(b, hash[1]);
+    hash[2] = add_32(c, hash[2]);
+    hash[3] = add_32(d, hash[3]);
+    hash[4] = add_32(e, hash[4]);
   }
   return hash;
 }
@@ -94,14 +95,15 @@ function sha_func(iter, x, y, z)
   return x ^ y ^ z;
 }
  
-/* Add integers, wrapping at 2^32. This uses 16-bit operations internally to work around bugs in some JS interpreters. */
-function safe_add(x, y)
+/* Javascript by default does 64 bit addition, but we actually want to do 32bit signed addition (wrap overflow around rather than create a 64bit number)*/
+function add_32(x, y)
 {
   var lsw = (x & 0xFFFF) + (y & 0xFFFF);
   var msw = (x >> 16) + (y >> 16) + (lsw >> 16);
   return (msw << 16) | (lsw & 0xFFFF);
 }
- 
+
+/* Retate left, bitwise operations work on 32bits so no need to have a trick here. */
 function rol(num, cnt) { return (num << cnt) | (num >>> (32 - cnt)); }
  
 /*
