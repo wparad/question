@@ -83,7 +83,7 @@ function core_sha1(x, len)
     for (var j = 0; j < 80; j++) 
     {
       w[j] = j < 16 ? x[i + j] : rol(w[j - 3] ^ w[j - 8] ^ w[j - 14] ^ w[j - 16], 1);
-      var t = add_32(add_32(rol(a, 5), sha_func(j, b, c, d)), add_32(add_32(e, w[j]), constants[(j/20)>>0]));
+      var t = add_32(rol(a, 5), sha_func(j, b, c, d), e, w[j], constants[(j/20)>>0]);
       e = d;
       d = c;
       c = rol(b, 30);
@@ -101,11 +101,11 @@ function core_sha1(x, len)
 }
 
 /* Javascript by default does 64 bit addition, but we actually want to do 32bit signed addition (wrap overflow around rather than create a 64bit number)*/
-function add_32(x, y)
+function add_32(v, w, x, y, z)
 {
-  var lsw = (x & 0xFFFF) + (y & 0xFFFF);
-  var msw = (x >> 16) + (y >> 16) + (lsw >> 16);
-  return (msw << 16) | (lsw & 0xFFFF);
+  var lsw = (v & 0xFFFF) + (w & 0xFFFF) + (x & 0xFFFF) + (y & 0xFFFF) + (z & 0xFFFF);
+  var msw = (v >>> 16) + (w >>> 16) + (x >>> 16) + (y >>> 16) + (z >>> 16) + (lsw >>> 16);
+  return ((msw & 0xFFFF) << 16) | (lsw & 0xFFFF);
 }
 
 function sha_func(iter, x, y, z)
