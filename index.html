@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html>
 <!--
-
-A JavaScript implementation of the Secure Hash Algorithm, HMAC-SHA-1, as defined in FIPS PUB 180-1
-
 Copyright (c) 2014, Warren Parad
 All rights reserved.
 
@@ -60,6 +57,11 @@ function Generate()
 
     document.getElementById("Answer").innerHTML = answer;
 }
+
+/* A JavaScript implementation of the Secure Hash Algorithm, HMAC-SHA-1, as defined in FIPS PUB 180-1
+*  -----
+*  Everything below this point to just logic to implement the hash.
+*/
 
 function sha1(input)
 {
