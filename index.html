@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="MainApp">
 <!--
 Copyright (c) 2014-2016, Warren Parad
 All rights reserved.
@@ -31,31 +31,76 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
 
 
-<body>
+<body ng-controller="mainController">
 
 	<h1>Security Answer Generator</h1>
 
 	<form action="">
-		Question: <input type="text" id="question" value="" size="100">
-		Password: <input type="text" id="password" value="" size="20">
+		Question: <input type="text" id="question" ng-model="Question" value="" size="100">
+		Password: <input type="text" id="password" ng-model="Password" value="" size="20">
 	</form>
-
-	<button onclick="Generate()">Generate</button>
+	<br />
+	<button ng-click="GenerateClick()">Generate</button>
 
 	<br />
 	<br />
-	Answer:
- 	<p name="Answer" id="Answer"></p>
+	Answer: <br />
+	{{ Answer }}
+	<br />
+	<br />
 	Caveats: <br />
-	* Ebay - limited to 20 characters <br />
-	* HSBC - 6 characters <br />
-	* CITI - 6 characters <br />
-	* Charles Schwab - 30 characters <br />
-	* Banana Republic - 6 characters <br />
-	* Fidelity - 9 chacacters <br />
-	* NW Mutual - 20 characters <br />
-	* Travelers - 20 characters <br />
-	<br />
+	<table border="1">
+		<tr>
+			<th>Service</th>
+			<th>Limit</th>
+			<th>Code</th>
+		</tr>
+		<tr>
+			<td>Ebay</td>
+			<td>20</td>
+			<td>{{ Answer | limitTo:20 }}</td>
+		</tr>
+		<tr>
+			<td>HSBC</td>
+			<td>6</td>
+			<td>{{ Answer | limitTo:6 }}</td>
+		</tr>
+		<tr>
+			<td>CITI</td>
+			<td>6</td>
+			<td>{{ Answer | limitTo:6 }}</td>
+		</tr>
+		<tr>
+			<td>Charles Schwab</td>
+			<td>30</td>
+			<td>{{ Answer | limitTo:30 }}</td>
+		</tr>
+		<tr>
+			<td>Banana Republic</td>
+			<td>6</td>
+			<td>{{ Answer | limitTo:6 }}</td>
+		</tr>
+		<tr>
+			<td>Fidelity</td>
+			<td>9</td>
+			<td>{{ Answer | limitTo:9 }}</td>
+		</tr>
+		<tr>
+			<td>NW Mutual</td>
+			<td>20</td>
+			<td>{{ Answer | limitTo:20 }}</td>
+		</tr>
+		<tr>
+			<td>Travelers</td>
+			<td>20</td>
+			<td>{{ Answer | limitTo:20 }}</td>
+		</tr>
+		<tr>
+			<td>Apple</td>
+			<td>31</td>
+			<td>{{ Answer | limitTo:31 }}</td>
+		</tr>
+	</table>
 	<br />
 	<script type="text/javascript"><!--
 	google_ad_client = "ca-pub-1233157797225623";
@@ -65,6 +110,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	google_ad_height = 90;
 	//-->
 	</script>
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.min.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.8/angular.min.js"></script>
 	<script type="text/javascript" src="//pagead2.googlesyndication.com/pagead/show_ads.js"></script>
 	<script type="text/javascript" src="index.js"></script>
 
